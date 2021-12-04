@@ -10,6 +10,13 @@
     )
   )
 
+
+#_(def edn-readers {'mulife.core.rule-frame.RuleFrame map->RuleFrame
+                  'mulife.core.rule-frame.Slave map->Slave
+                  'mulife.rule-frame.RuleFrame map->RuleFrame
+                  'mulife.rule-frame.Slave map->Slave})
+
+
 (defn send-data
   "Creates a link, puts the current rule data in a blob, encodes that blob,
    and calls the click method on the link to send it to the user.  Essentally this
@@ -39,11 +46,28 @@
       (let [document            (oget js/window "document")
             selected-files      (ocall! document "getElementById" "uploaded-files")
             first-selected-file (oget+ selected-files "files" "0")]
-           ;(println "UPLOADING FILES:" selected-files)
+           (println "UPLOADING FILES:" selected-files "," first-selected-file)
            (-> (ocall! first-selected-file "text")
                (.then (fn [fc]
                           (let [new-map (edn/read-string {:readers edn-readers} fc)]
-                               callback))))))
+                            (callback new-map)))))))
+
+
+(defn upload-control
+  "A control to upload your rules."
+  [edn-readers callback]
+  [:div {:class "upload fileUpload btn btn-primary col_12"}
+   [:label {:for "upload-button"
+            :class "col_6"} "Upload ruleset"]
+   [:input {:id            "uploaded-files"
+            :type          "file"
+            :style {:font-size "8pt"}
+            :class         "upload col_6"
+            :placeholder   "rules.edn"
+            :on-change     #(fetch-and-parse-uploaded-file! edn-readers callback)}]])
+
+
+
 
 (defn download-control
       "A control to download your rules."
