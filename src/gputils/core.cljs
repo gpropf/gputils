@@ -18,21 +18,22 @@
 
 
 (defn send-data
-  "Creates a link, puts the current rule data in a blob, encodes that blob,
-   and calls the click method on the link to send it to the user.  Essentally this
+  "Creates a link, puts data-map in a blob, encodes that blob,
+   and calls the click method on the link to send it to the user.  Essentially this
    is how we can have a nice download button instead of an actual link that the user
    needs to right-click on to download."
-  [data-map]
-  (let [rule-blob     (js/Blob. (seq (prn-str data-map)) (clj->js {:type "application/edn"}))
+  ([data-map download-filename]
+  (let [blob     (js/Blob. (seq (prn-str data-map)) (clj->js {:type "application/edn"}))
         document      (oget js/window "document")
         url           (oget js/window "URL")
         link          (ocall! document "createElement" "a")
-        rule-blob-url (ocall! url "createObjectURL" rule-blob)]
+        blob-url (ocall! url "createObjectURL" blob)
+        _ (println "send-data: filename=" download-filename)]
     (-> link
         (oset! "target" "_blank")
-        (oset! "href" rule-blob-url)
-        (oset! "download" (:download-filename data-map))
-        (ocall! "click"))))
+        (oset! "href" blob-url)
+        (oset! "download" download-filename)
+        (ocall! "click")))))
 
 
 
