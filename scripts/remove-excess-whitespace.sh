@@ -1,5 +1,5 @@
 #!/bin/bash
 
-REGEX="s/\(^\t*$*\)\+/NEWLINE\n/g"
+REGEX='s/(^$){2,}/NEWLINE, /'
 
-sed -e $REGEX $1
+sed -r -e "$REGEX" $1

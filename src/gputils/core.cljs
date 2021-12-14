@@ -36,13 +36,12 @@
         (ocall! "click")))))
 
 
-
 (defn fetch-and-parse-uploaded-file!
       "Uses some basic JS DOM calls to get the uploaded data, then uses the
       'then' method of the promise that comes back to slurp and parse the
-      actual data.  Finally, swaps the resulting map in to replace
-      app-state in its entirety.  This essentially resets the entire app
-      back to where it was when you saved the file you load."
+      actual data. The readers handle any user-defined object types. The
+      callback is usually going to be some kind of de-serializer that returns
+      whatever objects are in new-map."
       [edn-readers callback]
       (let [document            (oget js/window "document")
             selected-files      (ocall! document "getElementById" "uploaded-files")
@@ -55,7 +54,7 @@
 
 
 (defn upload-control
-  "A control to upload your rules."
+  "See description of fetch-and-parse-uploaded-file!"
   [edn-readers callback]
   [:div {:class "upload fileUpload btn btn-primary col_12"}
    [:label {:for "upload-button"
@@ -68,10 +67,8 @@
             :on-change     #(fetch-and-parse-uploaded-file! edn-readers callback)}]])
 
 
-
-
 (defn download-control
-      "A control to download your rules."
+      "A control to download your data-map."
       [data-map on-change-fn]
       (let [help-text "Enter a filename for the ruleset you want to download."]
            [:div {:class "download-control col_12"}
@@ -88,7 +85,7 @@
             [:br]
             [:label {:for "download-button"
                      ;:class "col_7"
-                     } "Download ruleset"]
+                     } "Download"]
             [:button {:id       "download-button"
                       :type     "button"
                       :class    "small"
@@ -100,11 +97,11 @@
                      :style         {:float "right"}
                      :type          "text"
                      :class         "medium"
-                     :placeholder   "rules.edn"
+                     :placeholder   "data-map.edn"
                      :on-change     on-change-fn
                      :default-value (:download-filename data-map)}]]))
 
-(defn upload-control
+#_(defn upload-control
       "A control to upload your rules."
       [edn-readers callback]
       [:div {:class "upload fileUpload btn btn-primary col_12"}
