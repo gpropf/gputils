@@ -2,6 +2,7 @@
   (:require
     [reagent.dom :as rd]
     [clojure.string :as str]
+    [clojure.core]
     [reagent.core :as reagent :refer [atom]]
     [cljs.pprint :as pp :refer [pprint]]
     [oops.core :refer [oget oset! ocall! ;; ocall oapply oapply!
@@ -49,7 +50,15 @@
            (println "UPLOADING FILES:" selected-files "," first-selected-file)
            (-> (ocall! first-selected-file "text")
                (.then (fn [fc]
-                          (let [new-map (edn/read-string {:readers edn-readers} fc)]
+                        #_(set! clojure.core/*default-data-reader-fn* tagged-literal)
+                        (println "fetch-and-parse-uploaded-file! TRYING TO USE callback!!")
+                        (println "edn-readers: " edn-readers)
+                          (let [new-map (edn/read-string {:readers edn-readers} fc)
+                                _ (println "new-map: " new-map)
+                                _ (println "fetch-and-parse-uploaded-file! TRYING TO USE callback!!")
+                                _ (println "FILE CONTENTS: " fc)
+                                ]
+
                             (callback new-map)))))))
 
 
@@ -58,7 +67,7 @@
   [edn-readers callback]
   [:div {:class "upload fileUpload btn btn-primary col_12"}
    [:label {:for "upload-button"
-            :class "col_6"} "Upload ruleset"]
+            :class "col_6"} "Upload file"]
    [:input {:id            "uploaded-files"
             :type          "file"
             :style {:font-size "8pt"}
@@ -89,7 +98,7 @@
             [:button {:id       "download-button"
                       :type     "button"
                       :class    "small"
-                      :on-click #(send-data data-map)}
+                      :on-click #(send-data data-map "fixme.edn")}
              [:span {:class "fas fa-download"}]]
             [:input {:id            "download-filename"
                      :alt           help-text
