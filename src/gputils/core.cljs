@@ -24,7 +24,7 @@
    is how we can have a nice download button instead of an actual link that the user
    needs to right-click on to download."
   ([data-map download-filename]
-  (let [blob     (js/Blob. (seq (prn-str data-map)) (clj->js {:type "application/edn"}))
+  (let [blob     (js/Blob. (seq (prn-str data-map)) nil #_(clj->js {:type "application/edn"}))
         document      (oget js/window "document")
         url           (oget js/window "URL")
         link          (ocall! document "createElement" "a")
