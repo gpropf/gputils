@@ -18,7 +18,8 @@
 set -euo pipefail
 
 DROPBOX_DIR="$HOME/Dropbox"
-DH_WORK_DIR=${DROPBOX_DIR}/dh_work
+DH_WORK_DIR_REL_PATH="dh_work"
+#DH_WORK_DIR=${DROPBOX_DIR}/${DH_WORK_DIR_REL_PATH+x}
 DH_FILE_LIST="$HOME/.config/dropbox-helper/dropbox-helper.lst"
 INSTALLATION_MODE=false
 
@@ -28,13 +29,15 @@ function print_hline() {
     printf "%${length}s\n" | tr ' ' "$char"
 }
 
-
-
 function copy_file_listings() {
 
     while IFS= read -r line; do
         if [[ -n "$line" ]]; then
-            cp -a "$line" "$DH_WORK_DIR/"
+            cp --parents -a "$line" "$(work_dir_abs_path)/" 2>/dev/null || {
+                echo "Warning: Could not copy '$line'. It may not exist or you may not have permission."
+                continue
+            }
+            echo "Copied: $line to $(work_dir_abs_path)/"
         else
             echo "Skipping invalid or empty entry: $line"
         fi
@@ -60,7 +63,7 @@ function show_version() {
 }
 
 function work_dir_abs_path() {
-    echo ${DROPBOX_DIR}/${DH_WORK_DIR}
+    echo ${DROPBOX_DIR}/${DH_WORK_DIR_REL_PATH}
 }
 
 function have_you_installed() {
@@ -84,9 +87,7 @@ EOL
     echo "Sample backup list file created at: $DH_FILE_LIST"
 }
 
-
-
-echo "WDAP: $(work_dir_abs_path)"
+#echo "WDAP: $(work_dir_abs_path)"
 
 DRY_RUN=false
 
@@ -97,7 +98,7 @@ while getopts ":hw:ivd" opt; do
         exit 0
         ;;
     w)
-        DH_WORK_DIR="$OPTARG"
+        DH_WORK_DIR_REL_PATH="$OPTARG"
         ;;
     i)
         echo "Installing Dropbox Helper..."
@@ -124,29 +125,40 @@ while getopts ":hw:ivd" opt; do
 done
 
 if [ "$INSTALLATION_MODE" = true ]; then
-    if [ -z "${DH_WORK_DIR+x}" ]; then
+    if [ -z "${DH_WORK_DIR_REL_PATH+x}" ]; then
         echo "Work directory is either unset or empty. Cannot install without a work directory."
         #have_you_installed
         exit 1
     fi
 
-    if [ "${DH_WORK_DIR:0:2}" == ".." ]; then
+    if [ "${DH_WORK_DIR_REL_PATH:0:2}" == ".." ]; then
         echo "Work directory must be a subdirectory of your Dropbox folder."
-        echo "You provided: $(work_dir_abs_path)"
+        echo "You provided: ${DH_WORK_DIR_REL_PATH}"
         #have_you_installed
         exit 1
     fi
 
-    # Example usage of DRY_RUN
+    if [ -z "$DH_WORK_DIR_REL_PATH" ]; then
+            echo "Work directory relative path is not set. Cannot proceed with installation."
+            exit 1
+    fi
+
+    
+
     if $DRY_RUN; then
-        echo "Dry run enabled. No changes will be made."
-        echo "Would create work directory: $(work_dir_abs_path)"
+        echo "Dry run enabled. No changes will be made."        
         echo "Would create sample backup list file at: $DH_FILE_LIST"
-
-
-    else
+    else        
         mkdir -p "$(work_dir_abs_path)"
         echo "Created work directory: $(work_dir_abs_path)"
+        write_sample_backup_list
+        echo "Installation complete. Please edit the backup list file and rerun the script without -
+i to perform backups."
+        echo "Work directory is set to: $(work_dir_abs_path)"
+        echo "You can change this by rerunning the script with -w <relative_path>"
+        echo "Example: ./dropbox-helper.sh -i -w my_backup_dir"
+        echo "Note: The work directory is relative to your Dropbox folder."
+        echo "Example full path: $(work_dir_abs_path)"
     fi
 
 else
