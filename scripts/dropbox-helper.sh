@@ -30,14 +30,20 @@ function print_hline() {
 }
 
 function copy_file_listings() {
-
+    local dry_run="${1:-false}"
+    echo "copy_file_listings(): Local dry_run is set to: $dry_run"
     while IFS= read -r line; do
         if [[ -n "$line" ]]; then
+            if [ ${dry_run} = true ]; then
+                echo "[DRY RUN] Would copy: $line to $(work_dir_abs_path)/$line"
+                continue
+            fi
+            
             cp --parents -a "$line" "$(work_dir_abs_path)/" 2>/dev/null || {
                 echo "Warning: Could not copy '$line'. It may not exist or you may not have permission."
                 continue
             }
-            echo "Copied: $line to $(work_dir_abs_path)/"
+            echo "Copied: $line to $(work_dir_abs_path)/$line"
         else
             echo "Skipping invalid or empty entry: $line"
         fi
@@ -170,7 +176,7 @@ else
         exit 1
     fi
 
-    copy_file_listings
+    copy_file_listings $DRY_RUN
 fi
 
 # ...existing code...
