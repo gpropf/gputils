@@ -77,12 +77,12 @@ function have_you_installed() {
 function write_sample_backup_list() {
     mkdir -p "$(dirname "$DH_FILE_LIST")"
     cat <<EOL >"$DH_FILE_LIST"
-    /etc/apache2
-    /etc/ssh
-    ${DH_FILE_LIST}
-    $HOME/.bashrc
-    $HOME/.profile
-    $HOME/.ssh
+/etc/apache2
+/etc/ssh
+${DH_FILE_LIST}
+$HOME/.bashrc
+$HOME/.profile
+$HOME/.ssh
 EOL
     echo "Sample backup list file created at: $DH_FILE_LIST"
 }
@@ -169,6 +169,8 @@ else
         have_you_installed
         exit 1
     fi
+
+    copy_file_listings
 fi
 
 # ...existing code...
