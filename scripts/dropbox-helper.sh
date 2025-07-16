@@ -61,7 +61,7 @@ function show_help() {
     echo "  -w <path>       Specify work directory path"
     echo "  -i              Install Dropbox Helper"
     echo "  -v              Show version number"
-    echo "  -n              Dry run (no actual changes)"
+    echo "  -d              Dry run (no actual changes)"
 }
 
 function show_version() {
@@ -83,12 +83,11 @@ function have_you_installed() {
 function write_sample_backup_list() {
     mkdir -p "$(dirname "$DH_FILE_LIST")"
     cat <<EOL >"$DH_FILE_LIST"
-/etc/apache2
-/etc/ssh
 ${DH_FILE_LIST}
 $HOME/.bashrc
 $HOME/.profile
 $HOME/.ssh
+$HOME/.config
 EOL
     echo "Sample backup list file created at: $DH_FILE_LIST"
 }
@@ -154,6 +153,7 @@ if [ "$INSTALLATION_MODE" = true ]; then
     if $DRY_RUN; then
         echo "Dry run enabled. No changes will be made."        
         echo "Would create sample backup list file at: $DH_FILE_LIST"
+        echo "Would create work directory at: $(work_dir_abs_path)"
     else        
         mkdir -p "$(work_dir_abs_path)"
         echo "Created work directory: $(work_dir_abs_path)"
