@@ -39,6 +39,7 @@ function copy_file_listings() {
                 continue
             fi
             
+            # rsync -S -vrltH -pgo --stats -D --numeric-ids --delete --partial /path/to/source/dir/ /path/to/destination/dir
             cp --parents -a "$line" "$(work_dir_abs_path)/" 2>/dev/null || {
                 echo "Warning: Could not copy '$line'. It may not exist or you may not have permission."
                 continue
