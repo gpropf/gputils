@@ -14,14 +14,34 @@ TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
 #echo "Running: $CMD"
 #echo "Synced: ${LOCAL_DIRECTORY}/ to ${REMOTE_HOST}:${LOCAL_DIRECTORY}"
 
-dirs=("Writing" "backup-test" "Dropbox" "Projects")
+files=("Writing" "backup-test" "Dropbox" "Projects")
+symlinks=("2025" "BUSINESS" "IR2F" "NWM" "OSF" "homepage")
 
-for d in "${dirs[@]}"; do
-  CMD="rsync -avz --delete --partial --progress $HOME/$d ${REMOTE_HOST}:"
-  echo "Running: $CMD"
-  $CMD || {
-    echo "Warning: Could not sync '$HOME/$d' to '${REMOTE_HOST}:$d'. It may not exist or you may not have permission." | tee SYNC_HAD_ERRORS
-    exit 1
-  }
-  echo "${TIMESTAMP}: Synced: '$HOME/$d' to '${REMOTE_HOST}:$d'" | tee -a ${SYNC_LOG}
-done
+# for d in "${dirs[@]}"; do
+#   CMD="rsync -avz --delete --partial --progress $HOME/$d ${REMOTE_HOST}:"
+#   echo "Running: $CMD"
+#   $CMD || {
+#     echo "Warning: Could not sync '$HOME/$d' to '${REMOTE_HOST}:$d'. It may not exist or you may not have permission." | tee SYNC_HAD_ERRORS
+#     exit 1
+#   }
+#   echo "${TIMESTAMP}: Synced: '$HOME/$d' to '${REMOTE_HOST}:$d'" | tee -a ${SYNC_LOG}
+# done
+
+function sync_files {
+  #local FILES=$1
+  for d in "${@}"; do
+    CMD="rsync -avz --delete --partial --progress $HOME/$d ${REMOTE_HOST}:"
+    echo "Running: $CMD"
+    $CMD || {
+      echo "Warning: Could not sync '$HOME/$d' to '${REMOTE_HOST}:$d'. It may not exist or you may not have permission." | tee SYNC_HAD_ERRORS
+      exit 1
+    }
+    echo "${TIMESTAMP}: Synced: '$HOME/$d' to '${REMOTE_HOST}:$d'" | tee -a ${SYNC_LOG}
+  done
+
+}
+
+sync_files "${files[@]}"
+sync_files "${symlinks[@]}"
+
+
