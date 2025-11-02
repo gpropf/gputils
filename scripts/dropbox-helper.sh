@@ -17,6 +17,8 @@
 
 set -euo pipefail
 
+REMOTE_HOST="greg@ln"
+REMOTE_DIRECTORY="backup"
 DROPBOX_DIR="$HOME/Dropbox"
 DH_WORK_DIR_REL_PATH="dh_work"
 #DH_WORK_DIR=${DROPBOX_DIR}/${DH_WORK_DIR_REL_PATH+x}
@@ -34,13 +36,17 @@ function copy_file_listings() {
     echo "copy_file_listings(): Local dry_run is set to: $dry_run"
     while IFS= read -r line; do
         if [[ -n "$line" ]]; then
+            #CMD="rsync -avz --progress ${line} ${REMOTE_HOST}:${REMOTE_DIRECTORY}/ 2>/dev/null"
+            CMD="rsync -avz --progress ${line} greg@45.79.64.37:${REMOTE_DIRECTORY}"
             if [ ${dry_run} = true ]; then
-                echo "[DRY RUN] Would copy: $line to $(work_dir_abs_path)/$line"
+                echo "[DRY RUN] Would run: $CMD"
                 continue
             fi
             
             # rsync -S -vrltH -pgo --stats -D --numeric-ids --delete --partial /path/to/source/dir/ /path/to/destination/dir
-            cp --parents -a "$line" "$(work_dir_abs_path)/" 2>/dev/null || {
+            echo "Running: $CMD"
+            $CMD || {
+            #cp --parents -a "$line" "$(work_dir_abs_path)/" 2>/dev/null || {
                 echo "Warning: Could not copy '$line'. It may not exist or you may not have permission."
                 continue
             }
